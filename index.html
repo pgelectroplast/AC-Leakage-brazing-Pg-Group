@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>AC Leakage Monitoring Dashboard</title>
   <link rel="icon" type="image/jpeg" href="pg-logo.jpg"/>
+  <link rel="shortcut icon" type="image/jpeg" href="pg-logo.jpg"/>
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -28,7 +29,7 @@
     .brand-left img{height:38px;border-radius:6px;object-fit:cover}
     .brand-left h1{font-size:19px;line-height:1;color:#fff}
     .nav-buttons{display:flex;gap:8px;align-items:center}
-    .btn{background:rgba(255,255,255,0.18);color:#fff;border:1px solid rgba(255,255,255,0.25);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px}
+    .btn{background:rgba(255,255,255,0.18);color:#fff;border:1px solid rgba(255,255,255,0.25);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
     .btn-excel{background:#217346;border:none;cursor:pointer}
 .btn-excel:hover{opacity:0.95}
 
@@ -59,6 +60,20 @@
     @keyframes liveBlink{
       0%,50%{opacity:1}
       51%,100%{opacity:0.3}
+    }
+
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     .container{max-width:1920px;margin:0 auto;padding:0 20px;height:calc(100vh - 58px);overflow-y:auto;position:relative}
@@ -210,6 +225,10 @@
       font-weight: 700;
       cursor: pointer;
       transition: opacity 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
     .login-btn:hover {
       opacity: 0.9;
@@ -272,7 +291,7 @@
   <div id="loginScreen" class="login-screen">
     <div class="login-container">
       <div class="login-header">
-        <div style="text-align: center; margin-bottom: 15px;">
+        <div style="text-align: center; margin-bottom: 20px;">
           <img src="pg-logo.jpg" alt="Company Logo" onerror="this.style.display='none'" style="max-width: 150px; max-height: 80px; width: auto; height: auto; object-fit: contain;">
         </div>
         <h1>AC Leakage Monitoring System</h1>
@@ -584,49 +603,22 @@
           </div>
         </div>
         <div class="settings-block">
-          <h4>QR Product Form Configuration (Add Incrementally)</h4>
-          <p class="muted" style="margin-bottom:8px">Select a location and a product. Then add items individually without overwriting existing data.</p>
-          
-          <div class="row" style="grid-template-columns:1fr 1fr; margin-bottom:12px">
-            <select id="productCfgLocation" onchange="syncProductDropdown()"><option value="">Select location (Global if empty)</option></select>
-            <select id="productCfgSelect" onchange="syncProductConfigPreview()"><option value="">Select Product to Edit</option></select>
+          <h4>QR Product Form Configuration</h4>
+          <div class="row">
+            <select id="productCfgLocation"><option value="">Select location (optional)</option></select>
+            <input id="productCfgName" type="text" placeholder="Product name (e.g. Window Line)">
+            <input id="productCfgLines" type="text" placeholder="Production lines CSV">
           </div>
-
-          <!-- Add Product Name -->
-          <div class="row" style="grid-template-columns:1fr auto; margin-bottom:8px">
-            <input id="productCfgName" type="text" placeholder="New Product Name (e.g. Window Line)">
-            <button type="button" class="btn" onclick="addNewProduct()" style="background:#5a67d8">Create Product</button>
+          <div class="row" style="margin-top:8px">
+            <input id="productCfgDefects" type="text" placeholder="Defect types CSV (optional override)">
+            <input id="productCfgStages" type="text" placeholder="Detection stages CSV">
+            <input id="productCfgJoints" type="text" placeholder="Joints CSV (e.g. J1:Desc, J2:Desc)">
           </div>
-          
-          <hr style="border:0;border-top:1px solid #eee;margin:12px 0;">
-
-          <!-- Add Production Line -->
-          <div class="row" style="grid-template-columns:1fr auto; margin-bottom:8px">
-            <input id="productCfgLines" type="text" placeholder="Production Line to Add (e.g. Line 1)">
-            <button type="button" class="btn" onclick="addProductionLine()" style="background:#5a67d8">Add Line</button>
+          <div class="row" style="margin-top:8px">
+            <input id="productCfgImg1" type="text" placeholder="Image 1 URL or file name">
+            <input id="productCfgImg2" type="text" placeholder="Image 2 URL or file name">
+            <button type="button" class="btn" onclick="addOrUpdateProductConfig()" style="background:#5a67d8">Add / Update Product</button>
           </div>
-
-          <!-- Add Detection Stage -->
-          <div class="row" style="grid-template-columns:1fr auto; margin-bottom:8px">
-            <input id="productCfgStages" type="text" placeholder="Detection Stage to Add">
-            <button type="button" class="btn" onclick="addDetectionStage()" style="background:#5a67d8">Add Stage</button>
-          </div>
-
-          <!-- Add Joint Number -->
-          <div class="row" style="grid-template-columns:1fr 2fr auto; margin-bottom:8px">
-            <input id="productCfgJointId" type="text" placeholder="Joint Number (e.g. Joint-1)">
-            <input id="productCfgJointDesc" type="text" placeholder="Description">
-            <button type="button" class="btn" onclick="addJointNumber()" style="background:#5a67d8">Add Joint</button>
-          </div>
-
-          <!-- Add Images -->
-          <div class="row" style="grid-template-columns:1fr 1fr auto;">
-            <input id="productCfgImg1" type="text" placeholder="Image 1 URL or filename">
-            <input id="productCfgImg2" type="text" placeholder="Image 2 URL or filename">
-            <button type="button" class="btn" onclick="addProductImages()" style="background:#5a67d8">Update Images</button>
-          </div>
-          
-          <div id="productConfigPreview" style="margin-top:12px; font-size:12px; background:#f9f9f9; padding:8px; border-radius:6px; max-height:150px; overflow:auto; border:1px solid #ddd; white-space:pre-wrap;">Select a product to preview its configuration.</div>
         </div>
         </div>
         <div class="settings-panel" data-panel="employees">
@@ -739,7 +731,7 @@
 
     let database = null;
     let currentData = [];
-    const SHEET_FETCH_COOLDOWN_MS = 30000;
+    const SHEET_FETCH_COOLDOWN_MS = 600000; // Increased to 10 minutes to save Netlify credits
     let lastSheetFetchAt = 0;
     let sheetFetchInFlight = null;
     let dashboardCharts = {};
@@ -1189,171 +1181,42 @@
       refreshSettingsPreview();
       queueAutoSyncSettings('set_defects');
     }
-    function syncProductDropdown() {
-      const loc = document.getElementById('productCfgLocation').value;
-      const sel = document.getElementById('productCfgSelect');
-      const cfg = APP_STATE.config || {};
-      let products = [];
-      
-      if (loc) {
-        const locCfg = (cfg.productCatalogByLocation && cfg.productCatalogByLocation[loc]) || {};
-        products = Object.keys(locCfg).sort();
-      } else {
-        const globalCfg = cfg.productCatalog || {};
-        products = Object.keys(globalCfg).sort();
-      }
-      
-      fillSelect(sel, products, 'Select Product to Edit');
-      syncProductConfigPreview();
-    }
-
-    function syncProductConfigPreview() {
-      const loc = document.getElementById('productCfgLocation').value;
-      const product = document.getElementById('productCfgSelect').value;
-      const preview = document.getElementById('productConfigPreview');
-      
-      if (!product) {
-        preview.textContent = 'Select a product to preview its configuration.';
-        return;
-      }
-      
-      const cfg = APP_STATE.config || {};
-      let productCfg = null;
-      if (loc) {
-        productCfg = cfg.productCatalogByLocation?.[loc]?.[product];
-      } else {
-        productCfg = cfg.productCatalog?.[product];
-      }
-      
-      if (!productCfg) {
-        preview.textContent = 'Configuration not found.';
-        return;
-      }
-      
-      preview.textContent = JSON.stringify(productCfg, null, 2);
-    }
-
-    function getOrCreateProductConfig(loc, product) {
+    function addOrUpdateProductConfig() {
+      const loc = String(document.getElementById('productCfgLocation').value || '').trim();
+      const product = String(document.getElementById('productCfgName').value || '').trim();
+      const linesCsv = String(document.getElementById('productCfgLines').value || '').trim();
+      const defectsCsv = String(document.getElementById('productCfgDefects').value || '').trim();
+      const stagesCsv = String(document.getElementById('productCfgStages').value || '').trim();
+      const jointsCsv = String(document.getElementById('productCfgJoints').value || '').trim();
+      const image1 = String(document.getElementById('productCfgImg1').value || '').trim();
+      const image2 = String(document.getElementById('productCfgImg2').value || '').trim();
+      if (!product) return;
       APP_STATE.config = APP_STATE.config || {};
       APP_STATE.config.productCatalog = APP_STATE.config.productCatalog || {};
       APP_STATE.config.productCatalogByLocation = APP_STATE.config.productCatalogByLocation || {};
-      
-      let bucket = loc ? APP_STATE.config.productCatalogByLocation : APP_STATE.config.productCatalog;
-      if (loc && !bucket[loc]) bucket[loc] = {};
-      let targetBucket = loc ? bucket[loc] : bucket;
-      
-      if (!targetBucket[product]) {
-        targetBucket[product] = {
-          lines: [],
-          detectionStages: [],
-          joints: [],
-          images: { image1: '', image2: '' }
-        };
-      }
-      return targetBucket[product];
-    }
-
-    function addNewProduct() {
-      const loc = String(document.getElementById('productCfgLocation').value || '').trim();
-      const product = String(document.getElementById('productCfgName').value || '').trim();
-      if (!product) {
-        showNotice('Please enter a product name.', 'error');
-        return;
-      }
-      getOrCreateProductConfig(loc, product);
-      document.getElementById('productCfgName').value = '';
-      syncProductDropdown();
-      document.getElementById('productCfgSelect').value = product;
-      syncProductConfigPreview();
-      showNotice(`Product "${product}" created.`, 'success');
-      queueAutoSyncSettings('product_created');
-    }
-
-    function addProductionLine() {
-      const loc = document.getElementById('productCfgLocation').value;
-      const product = document.getElementById('productCfgSelect').value;
-      const line = String(document.getElementById('productCfgLines').value || '').trim();
-      if (!product) return showNotice('Select a product first.', 'error');
-      if (!line) return showNotice('Enter a production line.', 'error');
-      
-      const cfg = getOrCreateProductConfig(loc, product);
-      cfg.lines = cfg.lines || [];
-      if (!cfg.lines.includes(line)) {
-        cfg.lines.push(line);
-        document.getElementById('productCfgLines').value = '';
-        syncProductConfigPreview();
-        showNotice(`Line "${line}" added to ${product}.`, 'success');
-        queueAutoSyncSettings('product_line_added');
+      const parseCsv = (v) => String(v || '').split(',').map((x) => x.trim()).filter(Boolean);
+      const parseJoints = (v) => parseCsv(v).map((item, idx) => {
+        const parts = item.split(':');
+        const id = (parts.shift() || `Joint-${idx + 1}`).trim();
+        const description = (parts.join(':') || id).trim();
+        return { id, description };
+      });
+      const payload = {
+        lines: parseCsv(linesCsv),
+        defects: parseCsv(defectsCsv),
+        detectionStages: parseCsv(stagesCsv),
+        joints: parseJoints(jointsCsv),
+        images: { image1, image2 }
+      };
+      if (loc) {
+        APP_STATE.config.productCatalogByLocation[loc] = APP_STATE.config.productCatalogByLocation[loc] || {};
+        APP_STATE.config.productCatalogByLocation[loc][product] = payload;
       } else {
-        showNotice('Line already exists.', 'info');
+        APP_STATE.config.productCatalog[product] = payload;
       }
-    }
-
-    function addDetectionStage() {
-      const loc = document.getElementById('productCfgLocation').value;
-      const product = document.getElementById('productCfgSelect').value;
-      const stage = String(document.getElementById('productCfgStages').value || '').trim();
-      if (!product) return showNotice('Select a product first.', 'error');
-      if (!stage) return showNotice('Enter a detection stage.', 'error');
-      
-      const cfg = getOrCreateProductConfig(loc, product);
-      cfg.detectionStages = cfg.detectionStages || [];
-      if (!cfg.detectionStages.includes(stage)) {
-        cfg.detectionStages.push(stage);
-        document.getElementById('productCfgStages').value = '';
-        syncProductConfigPreview();
-        showNotice(`Stage "${stage}" added to ${product}.`, 'success');
-        queueAutoSyncSettings('product_stage_added');
-      } else {
-        showNotice('Stage already exists.', 'info');
-      }
-    }
-
-    function addJointNumber() {
-      const loc = document.getElementById('productCfgLocation').value;
-      const product = document.getElementById('productCfgSelect').value;
-      const jId = String(document.getElementById('productCfgJointId').value || '').trim();
-      const jDesc = String(document.getElementById('productCfgJointDesc').value || '').trim();
-      
-      if (!product) return showNotice('Select a product first.', 'error');
-      if (!jId) return showNotice('Enter a joint number/ID.', 'error');
-      
-      const cfg = getOrCreateProductConfig(loc, product);
-      cfg.joints = cfg.joints || [];
-      
-      const existing = cfg.joints.find(j => j.id === jId);
-      if (existing) {
-        existing.description = jDesc || existing.description;
-        showNotice(`Joint "${jId}" updated.`, 'success');
-      } else {
-        cfg.joints.push({ id: jId, description: jDesc || jId });
-        showNotice(`Joint "${jId}" added to ${product}.`, 'success');
-      }
-      
-      document.getElementById('productCfgJointId').value = '';
-      document.getElementById('productCfgJointDesc').value = '';
-      syncProductConfigPreview();
-      queueAutoSyncSettings('product_joint_added');
-    }
-
-    function addProductImages() {
-      const loc = document.getElementById('productCfgLocation').value;
-      const product = document.getElementById('productCfgSelect').value;
-      const img1 = String(document.getElementById('productCfgImg1').value || '').trim();
-      const img2 = String(document.getElementById('productCfgImg2').value || '').trim();
-      
-      if (!product) return showNotice('Select a product first.', 'error');
-      
-      const cfg = getOrCreateProductConfig(loc, product);
-      cfg.images = cfg.images || { image1: '', image2: '' };
-      if (img1) cfg.images.image1 = img1;
-      if (img2) cfg.images.image2 = img2;
-      
-      document.getElementById('productCfgImg1').value = '';
-      document.getElementById('productCfgImg2').value = '';
-      syncProductConfigPreview();
-      showNotice(`Images updated for ${product}.`, 'success');
-      queueAutoSyncSettings('product_images_updated');
+      refreshSettingsPreview();
+      showNotice(`Product configuration saved for ${loc || 'global'} scope.`, 'success');
+      queueAutoSyncSettings('product_config');
     }
     function checkAuthStatus() {
       const raw = localStorage.getItem('acLeakageSession');
@@ -1410,14 +1273,14 @@
           sendBtn.disabled = !!busy;
           sendBtn.style.opacity = busy ? '0.7' : '1';
           sendBtn.style.pointerEvents = busy ? 'none' : 'auto';
-          sendBtn.textContent = busy ? 'Sending...' : 'Send OTP';
+          sendBtn.innerHTML = busy ? '<div class="loading"></div> Sending...' : 'Send OTP';
         }
       }
       if (mode === 'verify' && verifyBtn) {
         verifyBtn.disabled = !!busy;
         verifyBtn.style.opacity = busy ? '0.7' : '1';
         verifyBtn.style.pointerEvents = busy ? 'none' : 'auto';
-        verifyBtn.textContent = busy ? 'Verifying...' : 'Verify OTP';
+        verifyBtn.innerHTML = busy ? '<div class="loading"></div> Verifying...' : 'Verify OTP';
       }
       if (resendBtn) {
         const resendBusy = otpSendInFlight || Date.now() < otpResendCooldownUntil;
