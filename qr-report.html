@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Report - AC Leakage</title>
     <link rel="icon" type="image/jpeg" href="pg-logo.jpg"/>
+    <link rel="shortcut icon" type="image/jpeg" href="pg-logo.jpg"/>
+    
     <!-- Firebase v9 (modular SDK) -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
@@ -470,36 +472,6 @@
                 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label>Operator Name *</label>
-                        <input type="text" id="operatorName" placeholder="Enter operator name" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Location *</label>
-                        <select id="location" required>
-                            <option value="">Select Location</option>
-                        </select>
-                        <input type="hidden" id="locationLockedVal" value="">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Plant *</label>
-                        <select id="plant" required>
-                            <option value="">Select Plant</option>
-                        </select>
-                        <input type="hidden" id="plantLockedVal" value="">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Shift *</label>
-                        <select id="shift" required>
-                            <option value="">Select Shift</option>
-                            <option value="Day">Day Shift</option>
-                            <option value="Night">Night Shift</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
                         <label>Product Name *</label>
                         <select id="unitType" onchange="updateOptions()" required>
                             <option value="">Select Product Name</option>
@@ -519,6 +491,21 @@
                     </div>
                     
                     <div class="form-group">
+                        <label>Location *</label>
+                        <select id="location" required>
+                            <option value="">Select Location</option>
+                        </select>
+                        <input type="hidden" id="locationLockedVal" value="">
+                    </div>
+                    <div class="form-group">
+                        <label>Plant *</label>
+                        <select id="plant" required>
+                            <option value="">Select Plant</option>
+                        </select>
+                        <input type="hidden" id="plantLockedVal" value="">
+                    </div>
+                    
+                    <div class="form-group">
                         <label>Defect Type *</label>
                         <select id="defectType" required>
                             <option value="">Select Defect Type</option>
@@ -526,19 +513,32 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Detection Stage *</label>
-                        <select id="detectionStage" required>
-                            <option value="">Select Detection Stage</option>
-                            <option value="N2">N2</option>
-                            <option value="HLD1">HLD1</option>
-                            <option value="HLD2">HLD2</option>
-                            <option value="VLT">VLT</option>
-                            <option value="WLT">WLT</option>
-                            <option value="WLT Visual Insp.">WLT Visual Insp.</option>
-                            <option value="Smog Test">Smog Test</option>
+                        <label>Operator Name *</label>
+                        <input type="text" id="operatorName" placeholder="Enter operator name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Shift *</label>
+                        <select id="shift" required>
+                            <option value="">Select Shift</option>
+                            <option value="Day">Day Shift</option>
+                            <option value="Night">Night Shift</option>
                         </select>
                     </div>
                     
+<div class="form-group">
+    <label>Detection Stage *</label>
+    <select id="detectionStage" required>
+        <option value="">Select Detection Stage</option>
+        <option value="N2">N2</option>
+        <option value="HLD1">HLD1</option>
+        <option value="HLD2">HLD2</option>
+        <option value="VLT">VLT</option>
+        <option value="WLT">WLT</option>
+        <option value="WLT Visual Insp.">WLT Visual Insp.</option>
+        <option value="Smog Test">Smog Test</option>
+    </select>
+</div>                    
                     <div class="form-group">
                         <label>Severity Level *</label>
                         <select id="severity" required>
@@ -555,11 +555,6 @@
                             <option value="Rework">Rework</option>
                             <option value="Scrap">Scrap</option>
                         </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Quantity *</label>
-                        <input type="number" id="quantity" min="1" value="1" required>
                     </div>
                 </div>
                 
@@ -874,7 +869,7 @@ Copper: {
                 await otpRequest('sendOtp', { email, source: 'qr-report' });
                 localStorage.setItem('employeeEmailForSignIn', email);
                 document.getElementById('emailLinkInput').style.display = 'block';
-                document.getElementById('verifyOtpBtn').style.display = 'block';
+                document.getElementById('verifyOtpBtn').style.display = 'inline-flex';
                 loginBtn.disabled = false;
                 loginText.textContent = 'Send OTP';
                 showStatus('OTP sent on email.', 'success');
@@ -895,6 +890,13 @@ Copper: {
             let email = localStorage.getItem('employeeEmailForSignIn') || normalizeEmail(document.getElementById('loginEmail').value);
             if (!email) email = prompt('Please confirm your email');
             email = normalizeEmail(email);
+            
+            const verifyBtn = document.getElementById('verifyOtpBtn');
+            const originalText = verifyBtn.innerHTML;
+            verifyBtn.disabled = true;
+            verifyBtn.innerHTML = '<div class="loading"></div> Verifying...';
+            hideLoginError();
+            
             try {
                 const result = await otpRequest('verifyOtp', { email, otp, source: 'qr-report' });
                 localStorage.removeItem('employeeEmailForSignIn');
@@ -917,9 +919,12 @@ Copper: {
                     activity: 'employee_login_success',
                     source: 'qr-report'
                 });
-                hideLoginError();
+                verifyBtn.disabled = false;
+                verifyBtn.innerHTML = originalText;
                 showFormPage();
             } catch (error) {
+                verifyBtn.disabled = false;
+                verifyBtn.innerHTML = originalText;
                 showLoginError(error.message || 'Verification failed');
             }
         }
@@ -1547,12 +1552,6 @@ Copper: {
                 if (!selectedPlant || !selectedLocation) {
                     throw new Error('Plant and location are required.');
                 }
-                
-                const quantity = parseInt(document.getElementById('quantity').value, 10) || 1;
-                if (quantity < 1) {
-                    throw new Error('Quantity must be at least 1.');
-                }
-
                 const formData = {
                     timestamp: now.toISOString(),
                     type: document.getElementById("unitType").value,  // Product Name (maintains 'type' field for compatibility)
@@ -1577,32 +1576,24 @@ Copper: {
                     submittedByUid: currentUser.uid
                 };
            
-                console.log('Submitting form data:', formData, 'Quantity:', quantity);
-                
-                // Submit 'quantity' times
-                for (let i = 0; i < quantity; i++) {
-                    if (selectedLocation === 'Pune') {
-                        if (firebaseReady && window.firebaseDatabase) {
-                            const reportsRef = window.dbRef(window.firebaseDatabase, `leakageReportsByPlant/${selectedPlant}`);
-                            await window.dbPush(reportsRef, formData);
-                        }
-                    } else {
-                        syncToSheet('syncDefectReport', {
-                            report: formData,
-                            scope: {
-                                plant: selectedPlant,
-                                location: selectedLocation
-                            }
-                        });
-                    }
-                }
+                console.log('Submitting form data:', formData);
                 
                 if (selectedLocation === 'Pune') {
-                    console.log(`Data saved to Firebase successfully for Pune (${quantity} records)`);
+                    if (firebaseReady && window.firebaseDatabase) {
+                        const reportsRef = window.dbRef(window.firebaseDatabase, `leakageReportsByPlant/${selectedPlant}`);
+                        await window.dbPush(reportsRef, formData);
+                        console.log('Data saved to Firebase successfully for Pune');
+                    }
                 } else {
-                    console.log(`Data synced to Google Sheet for non-Pune location (${quantity} records)`);
+                    syncToSheet('syncDefectReport', {
+                        report: formData,
+                        scope: {
+                            plant: selectedPlant,
+                            location: selectedLocation
+                        }
+                    });
+                    console.log('Data synced to Google Sheet for non-Pune location');
                 }
-
                 syncToSheet('logActivity', {
                     email: currentUser.email,
                     role: currentUserProfile?.role || 'employee',
@@ -1611,8 +1602,7 @@ Copper: {
                     meta: {
                         location: selectedLocation,
                         plant: selectedPlant,
-                        line: formData.productionLine || '',
-                        quantity: quantity
+                        line: formData.productionLine || ''
                     }
                 });
                 
@@ -1622,7 +1612,6 @@ Copper: {
                 
                 // Show enhanced success message with animation
                 const successMsg = document.getElementById('submitSuccessMessage');
-                successMsg.innerHTML = `✅ Report submitted successfully! (${quantity} record${quantity > 1 ? 's' : ''} saved) Form will be cleared in 2 seconds.`;
                 successMsg.classList.add('show');
                 
                 // Scroll to success message
